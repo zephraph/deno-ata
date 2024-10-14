@@ -162,28 +162,11 @@ ${debugLinks
           debugLinks.push([resolvedUrl.url, redirectedUrl]);
           typescriptEnvironment.createFile(
             urlToFilepath(resolvedUrl.url),
-
-            // export * from … doesn't re-export default exports. But we
-            // want to re-export default exports. So we have turned
-            // allowSyntheticDefaultImports on, which makes the next
-            // line of code work, but on the other hand, doesn't _actually_
-            // work in Deno because they don't support the option because
-            // Node.js doesn't support the option in their native ESM
-            // loading strategy.
-            //
-            // So, if we can find a way to essentially "link" or "redirect"
-            // typescript modules other than this one, let's switch,
-            // but for now this lets us do a sort of 'transparent' redirect
-            // from one val to another.
-            //
-            // The purpose of this whole redirecting dance is because of relative
-            // paths: when you import from a url that is a redirect, and the
-            // code that's at that path uses relative paths, we need to resolve
-            // those relative paths relative to the final resolved url, not the
-            // initial one.
-            //
-            // https://github.com/denoland/deno/issues/17058
-            `export * from '${redirectedUrl}'; import e from '${redirectedUrl}'; export default e;`,
+            `
+            declare module '${importSpecifier}' {
+              ${importedCode}
+            }
+            `,
           );
         }
 
